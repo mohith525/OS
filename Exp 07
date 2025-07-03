@@ -1,0 +1,65 @@
+
+#include <stdio.h>
+
+int main() {
+    int at[10], bt[10], pr[10]; // Arrival Time, Burst Time, Priority
+    int n, i, j, temp, time = 0, count = 0, over = 0, sum_wait = 0, sum_turnaround = 0, start;
+    float avgwait, avgturn;
+
+    // Input the number of processes
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    // Input Arrival Time, Burst Time, and Priority
+    for (i = 0; i < n; i++) {
+        printf("Enter Arrival Time, Burst Time, and Priority for Process[%d]: ", i + 1);
+        scanf("%d %d %d", &at[i], &bt[i], &pr[i]);
+    }
+
+    // Sort processes by Arrival Time (and by Priority if Arrival Time is the same)
+    for (i = 0; i < n - 1; i++) {
+        for (j = i + 1; j < n; j++) {
+            if (at[i] > at[j] || (at[i] == at[j] && pr[i] > pr[j])) {
+                temp = at[i]; at[i] = at[j]; at[j] = temp;
+                temp = bt[i]; bt[i] = bt[j]; bt[j] = temp;
+                temp = pr[i]; pr[i] = pr[j]; pr[j] = temp;
+            }
+        }
+    }
+
+    // Display Header
+    printf("\n\nProcess\t| Arrival Time\t| Burst Time\t| Start Time\t| End Time\t| Waiting Time\t| Turnaround Time\n\n");
+
+    // Scheduling Processes
+    while (over < n) {
+        // Select process with the highest priority among available processes
+        for (i = over; i < n - 1; i++) {
+            for (j = i + 1; j < n; j++) {
+                if (at[i] <= time && pr[i] > pr[j]) {
+                    temp = at[i]; at[i] = at[j]; at[j] = temp;
+                    temp = bt[i]; bt[i] = bt[j]; bt[j] = temp;
+                    temp = pr[i]; pr[i] = pr[j]; pr[j] = temp;
+                }
+            }
+        }
+
+        // Process Execution
+        start = time;          // Start Time
+        time += bt[over];      // End Time = Start Time + Burst Time
+        printf("P[%d]\t|\t%d\t|\t%d\t|\t%d\t|\t%d\t|\t%d\t|\t%d\n", 
+                over + 1, at[over], bt[over], start, time, time - at[over] - bt[over], time - at[over]);
+
+        // Update Waiting Time and Turnaround Time
+        sum_wait += time - at[over] - bt[over];
+        sum_turnaround += time - at[over];
+        over++;
+    }
+
+    // Calculate and display averages
+    avgwait = (float)sum_wait / n;
+    avgturn = (float)sum_turnaround / n;
+    printf("\nAverage Waiting Time: %.2f", avgwait);
+    printf("\nAverage Turnaround Time: %.2f\n", avgturn);
+
+    return 0;
+}
